@@ -53,7 +53,7 @@ python canvas-logs.py \
 - `--username`: Canvas login/unique_id to filter (required)
 - `--start`: Start timestamp in EST/EDT format (required, inclusive)
 - `--end`: End timestamp in EST/EDT format (required, exclusive)
-- `--output-dir`: Output directory for Excel files (required)
+- `--output-dir`: Output directory (optional). If omitted, a folder named exactly as `--username` will be created and used.
 
 ### Output
 

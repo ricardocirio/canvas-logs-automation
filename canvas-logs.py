@@ -377,26 +377,27 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--username", required=True, help="Canvas login/unique_id to filter")
     parser.add_argument("--start", required=True, type=parse_dt, help="Start timestamp (EST)")
     parser.add_argument("--end", required=True, type=parse_dt, help="End timestamp (EST, exclusive)")
-    parser.add_argument("--output-dir", required=True, help="Output directory for Excel files")
+    parser.add_argument("--output-dir", required=False, help="Output directory (defaults to the username)")
     args = parser.parse_args(argv)
 
     try:
-        # Create output directory
-        os.makedirs(args.output_dir, exist_ok=True)
+        # Resolve output directory (default to username if not provided)
+        output_dir = args.output_dir or args.username
+        os.makedirs(output_dir, exist_ok=True)
         
         # Get base name from output directory for file naming
-        dir_basename = os.path.basename(os.path.normpath(args.output_dir))
+        dir_basename = os.path.basename(os.path.normpath(output_dir))
         
         # Run both queries
         results = {}
         for query_type in ["activity", "submissions"]:
-            output_file = os.path.join(args.output_dir, f"{dir_basename}-{query_type}.xlsx")
+            output_file = os.path.join(output_dir, f"{dir_basename}-{query_type}.xlsx")
             print(f"Running {query_type} query...")
             count = export_query(query_type, args.username, args.start, args.end, output_file)
             results[query_type] = (count, output_file)
             print(f"  → Wrote {count} rows to {output_file}")
         
-        print(f"\nCompleted successfully! Results in: {args.output_dir}/")
+        print(f"\nCompleted successfully! Results in: {output_dir}/")
         return 0
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
