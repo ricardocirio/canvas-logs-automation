@@ -62,15 +62,18 @@ IP_CACHE: Dict[str, Dict[str, Optional[str]]] = {}
 
 
 def get_ip_location(ip: str) -> Dict[str, Optional[str]]:
-    """Get location info for an IP address using ipinfo.io with fallback to ip-api.com."""
+    """Get location info for an IP address using ipinfo.io with fallback to ip-api.com.
+
+    Returns a dict with keys: country, region, city, isp
+    """
     if not ip:
-        return {"country": None, "region": None, "city": None}
+        return {"country": None, "region": None, "city": None, "isp": None}
     
     # Check cache first
     if ip in IP_CACHE:
         return IP_CACHE[ip]
     
-    location = {"country": None, "region": None, "city": None}
+    location = {"country": None, "region": None, "city": None, "isp": None}
     
     # Try ipinfo.io first (rate limited, free tier: ~50k requests/month)
     try:
@@ -80,21 +83,25 @@ def get_ip_location(ip: str) -> Dict[str, Optional[str]]:
             location["country"] = data.get("country")
             location["region"] = data.get("region")
             location["city"] = data.get("city")
+            # ipinfo returns ISP/organization under 'org' (e.g., 'AS1234 Some ISP')
+            location["isp"] = data.get("org")
             IP_CACHE[ip] = location
             time.sleep(0.1)  # Rate limiting
             return location
     except Exception:
         pass
     
-    # Fallback to ip-api.com (free, 45 requests/minute)
+    # Fallback to ipwho.is (no API key, fair-use limits)
     try:
-        response = requests.get(f"http://ip-api.com/json/{ip}", timeout=5)
+        response = requests.get(f"https://ipwho.is/{ip}", timeout=5)
         if response.status_code == 200:
             data = response.json()
-            if data.get("status") == "success":
-                location["country"] = data.get("countryCode")
-                location["region"] = data.get("regionName")
+            if data.get("success") is True:
+                location["country"] = data.get("country_code")
+                location["region"] = data.get("region")
                 location["city"] = data.get("city")
+                conn = data.get("connection") or {}
+                location["isp"] = conn.get("isp") or conn.get("org")
                 IP_CACHE[ip] = location
                 time.sleep(0.1)  # Rate limiting
                 return location
@@ -353,13 +360,15 @@ def export_query(query_type: str, username: str, start_ts: datetime, end_ts: dat
         df['country'] = df[ip_col].apply(lambda x: location_map.get(str(x), {}).get('country') if pd.notna(x) else None)
         df['region'] = df[ip_col].apply(lambda x: location_map.get(str(x), {}).get('region') if pd.notna(x) else None)
         df['city'] = df[ip_col].apply(lambda x: location_map.get(str(x), {}).get('city') if pd.notna(x) else None)
+        df['isp'] = df[ip_col].apply(lambda x: location_map.get(str(x), {}).get('isp') if pd.notna(x) else None)
         
         # Reorder columns to place geolocation after IP
         ip_idx = df.columns.get_loc(ip_col)
-        cols = [c for c in df.columns if c not in ['country', 'region', 'city']]
+        cols = [c for c in df.columns if c not in ['country', 'region', 'city', 'isp']]
         cols.insert(ip_idx + 1, 'country')
         cols.insert(ip_idx + 2, 'region')
         cols.insert(ip_idx + 3, 'city')
+        cols.insert(ip_idx + 4, 'isp')
         df = df[cols]
     
     # Write to Excel using pandas (faster than openpyxl row-by-row)

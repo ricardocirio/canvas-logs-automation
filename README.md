@@ -6,10 +6,10 @@ Export Canvas activity logs and submissions from PostgreSQL to Excel with timezo
 
 - **Dual Query Export**: Activity logs and assignment submissions
 - **Timezone Handling**: Automatic UTC → EST/EDT conversion with DST support
-- **IP Geolocation**: Adds country, region, and city columns for each IP address
+- **IP Geolocation**: Adds country, region, city, and ISP/org columns for each IP address
 - **Fast Processing**: Optimized with pandas for efficient data handling
 - **Excel Output**: Clean, formatted spreadsheets ready for analysis
- - **Word Summary Report**: Auto-generated .docx report grouped by course with assignment bullets
+- **Word Summary Report**: Auto-generated .docx report grouped by course with assignment bullets
 
 ## Setup
 
@@ -64,7 +64,7 @@ Creates the specified folder with:
 
 Each file includes:
 - Timestamps converted to EST/EDT
-- IP address with country, region, and city columns
+- IP address with country, region, city, and ISP columns
 - All relevant Canvas data fields
 
 ## Notes
@@ -75,8 +75,8 @@ Each file includes:
 - Handles Daylight Saving Time transitions correctly
 
 **IP Geolocation:**
-- Uses ipinfo.io (primary) and ip-api.com (fallback)
-- Free tier limits: ~50k requests/month (ipinfo), 45/min (ip-api)
+- Uses ipinfo.io (primary) and ipwho.is (fallback)
+- Free tier limits: ~50k requests/month (ipinfo); ipwho.is is keyless with fair‑use limits
 - Results are cached to minimize API calls
 - Only unique IPs are looked up
 
