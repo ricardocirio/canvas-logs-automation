@@ -65,14 +65,13 @@ Creates the specified folder with:
 Each file includes:
 - Timestamps converted to EST/EDT
 - IP address with country, region, city, and ISP columns
-- All relevant Canvas data fields
+- Relevant Canvas data fields
 
 ## Notes
 
 **Timezone Handling:**
 - Input times (`--start` and `--end`) are interpreted as EST/EDT
 - Database timestamps (UTC) are automatically converted to EST/EDT for output
-- Handles Daylight Saving Time transitions correctly
 
 **IP Geolocation:**
 - Uses ipinfo.io (primary) and ipwho.is (fallback)
@@ -80,33 +79,7 @@ Each file includes:
 - Results are cached to minimize API calls
 - Only unique IPs are looked up
 
-**Performance:**
 **Word Summary (.docx):**
 - Requires `python-docx` (included in `requirements.txt`)
 - If the package isn’t installed, the script will skip generating the Word report and continue
-- Format per course:
-  - `Course Name: <course>` (bold)
-  - `Assignments Submitted:` followed by list items of assignments
-    - `Submitted: mm/dd/yyyy at hh:mm AM/PM`
-    - `IP Address: <value>`
-    - `IP Address Location: city, region, country`
-- Optimized with pandas for fast data processing
-- Handles large datasets efficiently (1000s of rows)
-- Geolocation lookups happen in batch before writing
-
-## Troubleshooting
-
-**Connection Issues:**
-- Verify PostgreSQL environment variables are set correctly
-- Check network access to the database
-- Ensure SSL mode matches your database configuration
-
-**Timezone Issues:**
-- Input times must be in EST/EDT format
-- Output timestamps will be in EST/EDT (no timezone indicator in Excel)
-
-**Geolocation:**
-- Rate limiting: 0.1s delay between API calls
-- Failed lookups will show as empty cells (not errors)
-- Check internet connectivity if all lookups fail
 
