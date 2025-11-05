@@ -1,6 +1,6 @@
 # Canvas Logs Automation
 
-Export Canvas activity logs and submissions from PostgreSQL to Excel with timezone conversion and IP geolocation, plus an optional Word summary.
+Export Canvas activity logs and submissions from PostgreSQL to Excel with timezone conversion and IP geolocation, and generates a Word summary.
 
 ## Features
 
