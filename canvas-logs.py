@@ -220,6 +220,13 @@ def write_submissions_summary_docx(
     def _safe_str(x):
         return "" if pd.isna(x) else str(x)
 
+    # Find submission type column if present (case-insensitive variants)
+    submission_type_col = None
+    for c in df.columns:
+        if c.lower() in ("submission_type"):
+            submission_type_col = c
+            break
+
     # Sort by submitted time if present
     if time_col and time_col in df.columns:
         df_sorted = df.sort_values(by=time_col)
@@ -230,7 +237,7 @@ def write_submissions_summary_docx(
     doc = Document()
     # Bold title
     p_title = doc.add_paragraph()
-    r_title = p_title.add_run(f"{username} logs summary report")
+    r_title = p_title.add_run(f"{username} logs summary report ({start_ts.strftime('%Y-%m-%d')} to {end_ts.strftime('%Y-%m-%d')})")
     r_title.bold = True
 
     if course_col:
@@ -258,14 +265,30 @@ def write_submissions_summary_docx(
                     parts.append(str(row[country_col]))
                 location_str = ", ".join([p for p in parts if p])
 
+                # Top-level assignment bullet
                 p = doc.add_paragraph(style='List Bullet')
                 p.add_run(f"{assignment_name}")
-                p = doc.add_paragraph(style='List Bullet 2')
-                p.add_run(f"Submitted: {submitted_val}")
-                p = doc.add_paragraph(style='List Bullet 2')
-                p.add_run(f"IP Address: {ip_val}")
-                p = doc.add_paragraph(style='List Bullet 2')
-                p.add_run(f"IP Address Location: {location_str}")
+
+                # If this submission is an external tool or online quiz, add a single italic nested bullet
+                is_external = False
+                if submission_type_col is not None:
+                    try:
+                        sub_type = str(row.get(submission_type_col)).lower()
+                        is_external = sub_type in ('external_tool', 'basic_lti_launch')
+                    except Exception:
+                        is_external = False
+
+                if is_external:
+                    p = doc.add_paragraph(style='List Bullet 2')
+                    r = p.add_run("This is a third-party tool assignment. The Canvas logs do not capture activity that takes place in the tool once launched.")
+                    r.italic = True
+                else:
+                    p = doc.add_paragraph(style='List Bullet 2')
+                    p.add_run(f"Submitted: {submitted_val}")
+                    p = doc.add_paragraph(style='List Bullet 2')
+                    p.add_run(f"IP Address: {ip_val}")
+                    p = doc.add_paragraph(style='List Bullet 2')
+                    p.add_run(f"IP Address Location: {location_str}")
     else:
         doc.add_paragraph("Assignments Submitted:")
         for _, row in df_sorted.iterrows():
@@ -282,14 +305,30 @@ def write_submissions_summary_docx(
                 parts.append(str(row[country_col]))
             location_str = ", ".join([p for p in parts if p])
 
+            # Top-level assignment bullet
             p = doc.add_paragraph(style='List Bullet')
             p.add_run(f"{assignment_name}")
-            p = doc.add_paragraph(style='List Bullet 2')
-            p.add_run(f"Submitted: {submitted_val}")
-            p = doc.add_paragraph(style='List Bullet 2')
-            p.add_run(f"IP Address: {ip_val}")
-            p = doc.add_paragraph(style='List Bullet 2')
-            p.add_run(f"IP Address Location: {location_str}")
+
+            # Determine external tool or online quiz status for this row
+            is_external = False
+            if submission_type_col is not None:
+                try:
+                    sub_type = str(row.get(submission_type_col)).lower()
+                    is_external = sub_type in ('external_tool', 'online_quiz')
+                except Exception:
+                    is_external = False
+
+            if is_external:
+                p = doc.add_paragraph(style='List Bullet 2')
+                r = p.add_run("• This is a third-party tool assignment. The Canvas logs do not capture activity that takes place in the tool once launched.")
+                r.italic = True
+            else:
+                p = doc.add_paragraph(style='List Bullet 2')
+                p.add_run(f"Submitted: {submitted_val}")
+                p = doc.add_paragraph(style='List Bullet 2')
+                p.add_run(f"IP Address: {ip_val}")
+                p = doc.add_paragraph(style='List Bullet 2')
+                p.add_run(f"IP Address Location: {location_str}")
 
     doc.save(docx_path)
     print(f"  → Wrote submissions summary Word doc to {docx_path}")
