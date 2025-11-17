@@ -269,7 +269,7 @@ def write_submissions_summary_docx(
                 p = doc.add_paragraph(style='List Bullet')
                 p.add_run(f"{assignment_name}")
 
-                # If this submission is an external tool or online quiz, add a single italic nested bullet
+                # If this submission is an external tool or basic_lti_launch, add a single italic nested bullet
                 is_external = False
                 if submission_type_col is not None:
                     try:
@@ -280,8 +280,10 @@ def write_submissions_summary_docx(
 
                 if is_external:
                     p = doc.add_paragraph(style='List Bullet 2')
-                    r = p.add_run("This is a third-party tool assignment. The Canvas logs do not capture activity that takes place in the tool once launched.")
+                    r = p.add_run("This is a third-party tool assignment. The Canvas logs do not capture activity that takes place in the tool once launched. The timestamp below represents when Canvas received the grade from the external tool and may not reflect the actual submission time.")
                     r.italic = True
+                    p = doc.add_paragraph(style='List Bullet 2')
+                    p.add_run(f"Timestamp: {submitted_val}")
                 else:
                     p = doc.add_paragraph(style='List Bullet 2')
                     p.add_run(f"Submitted: {submitted_val}")
@@ -309,19 +311,21 @@ def write_submissions_summary_docx(
             p = doc.add_paragraph(style='List Bullet')
             p.add_run(f"{assignment_name}")
 
-            # Determine external tool or online quiz status for this row
+            # Determine external_tool or basic_lti_launch quiz status for this row
             is_external = False
             if submission_type_col is not None:
                 try:
                     sub_type = str(row.get(submission_type_col)).lower()
-                    is_external = sub_type in ('external_tool', 'online_quiz')
+                    is_external = sub_type in ('external_tool', 'basic_lti_launch')
                 except Exception:
                     is_external = False
 
             if is_external:
                 p = doc.add_paragraph(style='List Bullet 2')
-                r = p.add_run("• This is a third-party tool assignment. The Canvas logs do not capture activity that takes place in the tool once launched.")
+                r = p.add_run("• This is a third-party tool assignment. The Canvas logs do not capture activity that takes place in the tool once launched. The timestamp below represents when Canvas received the grade from the external tool and may not reflect the actual submission time.")
                 r.italic = True
+                p = doc.add_paragraph(style='List Bullet 2')
+                p.add_run(f"Timestamp: {submitted_val}")
             else:
                 p = doc.add_paragraph(style='List Bullet 2')
                 p.add_run(f"Submitted: {submitted_val}")
