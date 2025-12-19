@@ -283,7 +283,7 @@ def write_submissions_summary_docx(
                     r = p.add_run("This is a third-party tool assignment. The Canvas logs do not capture activity that takes place in the tool once launched. The timestamp below represents when Canvas received the grade from the external tool and may not reflect the actual submission time.")
                     r.italic = True
                     p = doc.add_paragraph(style='List Bullet 2')
-                    p.add_run(f"Timestamp: {submitted_val}")
+                    p.add_run(f"Submitted: {submitted_val}")
                 else:
                     p = doc.add_paragraph(style='List Bullet 2')
                     p.add_run(f"Submitted: {submitted_val}")
@@ -325,7 +325,7 @@ def write_submissions_summary_docx(
                 r = p.add_run("• This is a third-party tool assignment. The Canvas logs do not capture activity that takes place in the tool once launched. The timestamp below represents when Canvas received the grade from the external tool and may not reflect the actual submission time.")
                 r.italic = True
                 p = doc.add_paragraph(style='List Bullet 2')
-                p.add_run(f"Timestamp: {submitted_val}")
+                p.add_run(f"Submitted: {submitted_val}")
             else:
                 p = doc.add_paragraph(style='List Bullet 2')
                 p.add_run(f"Submitted: {submitted_val}")

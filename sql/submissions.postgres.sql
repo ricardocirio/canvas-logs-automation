@@ -130,9 +130,10 @@ JOIN enrollments e
  AND e.workflow_state = 'active'
 JOIN pseudonyms p
   ON p.user_id = fs.user_id
+ AND p.unique_id = %(username)s
 LEFT JOIN matched m
   ON m.user_id = fs.user_id
  AND m.assignment_id = fs.assignment_id
- And m.submitted_at = fs.submitted_at
+ AND m.submitted_at = fs.submitted_at
  AND m.rn = 1
 ORDER BY fs.submitted_at;
